@@ -99,15 +99,6 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
         </label>
 
         <label className="dsh-hmm-wait-field">
-          <span>匹配位置</span>
-          <select value={config.match} onChange={(event) => apply('match', event.target.value as TriggerMatchMode)}>
-            {matchOptions.map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="dsh-hmm-wait-field">
           <span>流动方向</span>
           <select value={config.direction} onChange={(event) => apply('direction', event.target.value as DanmakuDirection)}>
             {directionOptions.map(([value, label]) => (
@@ -168,6 +159,48 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
           />
         </label>
 
+        <label className="dsh-hmm-wait-field dsh-hmm-wait-check">
+          <input
+            type="checkbox"
+            checked={config.shake}
+            onChange={(event) => apply('shake', event.target.checked)}
+          />
+          <span>出现时抖动提醒</span>
+        </label>
+
+        <label className="dsh-hmm-wait-field">
+          <span>抖动幅度（px）</span>
+          <input
+            type="number"
+            min={1}
+            max={20}
+            value={config.shakeIntensity}
+            onChange={(event) => apply('shakeIntensity', Number(event.target.value) || DEFAULT_CONFIG.shakeIntensity)}
+          />
+        </label>
+      </div>
+
+      <details className="dsh-hmm-wait-advanced">
+        <summary>高级选项</summary>
+        <div className="dsh-hmm-wait-card-grid">
+        <label className="dsh-hmm-wait-field">
+          <span>匹配位置</span>
+          <select value={config.match} onChange={(event) => apply('match', event.target.value as TriggerMatchMode)}>
+            {matchOptions.map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="dsh-hmm-wait-field dsh-hmm-wait-check">
+          <input
+            type="checkbox"
+            checked={config.caseSensitive}
+            onChange={(event) => apply('caseSensitive', event.target.checked)}
+          />
+          <span>大小写敏感</span>
+        </label>
+
         <label className="dsh-hmm-wait-field">
           <span>同屏上限</span>
           <input
@@ -212,36 +245,8 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
             onChange={(event) => apply('maxContextChars', Number(event.target.value) || DEFAULT_CONFIG.maxContextChars)}
           />
         </label>
-
-        <label className="dsh-hmm-wait-field dsh-hmm-wait-check">
-          <input
-            type="checkbox"
-            checked={config.shake}
-            onChange={(event) => apply('shake', event.target.checked)}
-          />
-          <span>出现时抖动提醒</span>
-        </label>
-
-        <label className="dsh-hmm-wait-field">
-          <span>抖动幅度（px）</span>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            value={config.shakeIntensity}
-            onChange={(event) => apply('shakeIntensity', Number(event.target.value) || DEFAULT_CONFIG.shakeIntensity)}
-          />
-        </label>
-
-        <label className="dsh-hmm-wait-field dsh-hmm-wait-check">
-          <input
-            type="checkbox"
-            checked={config.caseSensitive}
-            onChange={(event) => apply('caseSensitive', event.target.checked)}
-          />
-          <span>大小写敏感</span>
-        </label>
-      </div>
+        </div>
+      </details>
 
       {saving ? <div className="dsh-hmm-wait-card-hint">保存中…</div> : null}
     </div>

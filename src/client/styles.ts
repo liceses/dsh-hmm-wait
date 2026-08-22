@@ -128,4 +128,119 @@ export const CSS = `
   font-size: 12px;
   opacity: 0.5;
 }
+.dsh-hmm-wait-advanced {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.dsh-hmm-wait-advanced summary {
+  cursor: pointer;
+  opacity: 0.7;
+  user-select: none;
+  padding: 2px 0;
+}
+.dsh-hmm-wait-advanced[open] summary { margin-bottom: 10px; }
+
+/* ---- 页面迷你配置卡片 ---- */
+.dsh-hmm-wait-mini {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483010;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.dsh-hmm-wait-mini-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  background: rgba(16, 22, 34, 0.72);
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease;
+}
+.dsh-hmm-wait-mini-btn:hover { transform: scale(1.08); }
+.dsh-hmm-wait-mini-gear {
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, transform 0.3s ease;
+}
+.dsh-hmm-wait-mini-gear.on { opacity: 1; }
+.dsh-hmm-wait-mini-btn[aria-expanded='true'] .dsh-hmm-wait-mini-gear { transform: rotate(60deg); }
+.dsh-hmm-wait-mini-card {
+  background: rgba(12, 16, 26, 0.92);
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
+  width: 236px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  color: inherit;
+  backdrop-filter: blur(6px);
+}
+.dsh-hmm-wait-mini-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.dsh-hmm-wait-mini-title { font-weight: 600; }
+.dsh-hmm-wait-mini-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #666;
+}
+.dsh-hmm-wait-mini-dot.on { background: #4caf7d; box-shadow: 0 0 6px rgba(76, 175, 125, 0.8); }
+.dsh-hmm-wait-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.dsh-hmm-wait-mini-row > span { opacity: 0.75; white-space: nowrap; }
+.dsh-hmm-wait-mini-row select {
+  background: rgba(128, 128, 128, 0.14);
+  color: inherit;
+  border: 1px solid rgba(128, 128, 128, 0.4);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 12px;
+}
+.dsh-hmm-wait-mini-row input[type='range'] { flex: 1; min-width: 0; }
+.dsh-hmm-wait-mini-toggle {
+  background: rgba(128, 128, 128, 0.14);
+  color: inherit;
+  border: 1px solid rgba(128, 128, 128, 0.4);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 64px;
+}
+.dsh-hmm-wait-mini-toggle.on {
+  border-color: rgba(76, 175, 125, 0.6);
+  color: #4caf7d;
+}
+.dsh-hmm-wait-mini-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+.dsh-hmm-wait-mini-foot {
+  font-size: 11px;
+  opacity: 0.5;
+  text-align: right;
+}
 `
