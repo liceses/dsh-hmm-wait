@@ -17,7 +17,6 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
 import { DEFAULT_CONFIG, SETTINGS_NS, type HmmWaitConfig } from '../schema.ts'
 import { DanmakuLayer } from './danmaku.tsx'
-import { MiniConfigCard } from './mini-config.tsx'
 import { SettingsCard, type HmmWaitCardActions } from './panel.tsx'
 import { publishConfigSnapshot } from './state.ts'
 import { CSS } from './styles.ts'
@@ -77,18 +76,6 @@ export function apply(ctx: ClientContext): void {
         order: 100,
       },
       DanmakuLayer,
-    ),
-  )
-
-  // 页面迷你配置卡片（右下角齿轮 → 紧凑配置，与设置页同源）。
-  ctx.slots.inject('shell.overlay', () =>
-    ctx.slots.register(
-      {
-        name: 'shell.overlay',
-        id: 'dsh-hmm-wait-mini',
-        order: 110,
-      },
-      () => <MiniConfigCard actions={actions} />,
     ),
   )
 
