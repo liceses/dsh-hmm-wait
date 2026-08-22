@@ -29,6 +29,21 @@ let items: DanmakuItem[] = []
 let itemSnapshot: readonly DanmakuItem[] = []
 const itemListeners = new Set<() => void>()
 
+/** 已消费的事件 id（防 SSE 重放补发导致重复弹幕；保留最近 500 个）。 */
+const seenIds: number[] = []
+const seenSet = new Set<number>()
+
+function markSeen(id: number): boolean {
+  if (seenSet.has(id)) return false
+  seenSet.add(id)
+  seenIds.push(id)
+  if (seenIds.length > 500) {
+    const oldest = seenIds.shift()
+    if (oldest !== undefined) seenSet.delete(oldest)
+  }
+  return true
+}
+
 function emitItems(): void {
   itemSnapshot = [...items]
   for (const fn of itemListeners) fn()
@@ -45,8 +60,9 @@ export function getDanmakuSnapshot(): readonly DanmakuItem[] {
   return itemSnapshot
 }
 
-/** 入队一条弹幕；超出 maxOnScreen 时挤掉最旧的。 */
+/** 入队一条弹幕（按事件 id 去重）；超出 maxOnScreen 时挤掉最旧的。 */
 export function pushDanmaku(item: DanmakuItem, maxOnScreen: number): void {
+  if (!markSeen(item.id)) return
   items = [...items, item]
   const cap = Math.max(1, maxOnScreen)
   if (items.length > cap) items = items.slice(items.length - cap)

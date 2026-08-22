@@ -24,6 +24,8 @@ export interface DanmakuHub {
   broadcast(event: DanmakuEvent): void
   /** 当前订阅连接数（诊断用）。 */
   subscriberCount(): number
+  /** 连接快照（诊断用）：每条连接的建立时间。 */
+  connections(): Array<{ id: number; since: number }>
   /** 关闭所有连接并停止心跳（挂在 ctx.effect 的清理里）。 */
   dispose(): void
 }
@@ -44,9 +46,13 @@ export interface RouteLike {
  * Create the hub. The heartbeat interval is owned by the caller's fiber:
  * dispose() must run when the plugin unloads (call it from ctx.effect).
  */
-export function createHub(heartbeatMs = 30000): DanmakuHubInternal {
+export function createHub(heartbeatMs = 30000, replayCap = 50): DanmakuHubInternal {
   const subscribers = new Set<ServerResponse>()
+  const connectionMeta = new Map<ServerResponse, { id: number; since: number }>()
+  let connectionSeq = 0
   let heartbeat: ReturnType<typeof setInterval> | null = null
+  // 最近事件环形缓冲：新连接/重连时立即补发，避免热重载/刷新间隙丢弹幕。
+  const history: DanmakuEvent[] = []
 
   const send = (res: ServerResponse, frame: string): void => {
     if (res.destroyed || res.writableEnded) {
@@ -63,11 +69,16 @@ export function createHub(heartbeatMs = 30000): DanmakuHubInternal {
 
   return {
     broadcast(event: DanmakuEvent): void {
+      history.push(event)
+      if (history.length > replayCap) history.shift()
       const frame = encodeSseFrame(SSE_EVENT_DANMAKU, event)
       for (const res of [...subscribers]) send(res, frame)
     },
     subscriberCount(): number {
       return subscribers.size
+    },
+    connections(): Array<{ id: number; since: number }> {
+      return [...connectionMeta.values()]
     },
     dispose(): void {
       if (heartbeat !== null) {
@@ -82,11 +93,19 @@ export function createHub(heartbeatMs = 30000): DanmakuHubInternal {
         }
       }
       subscribers.clear()
+      connectionMeta.clear()
+      history.length = 0
     },
     _subscribe(res: ServerResponse): void {
       subscribers.add(res)
+      connectionMeta.set(res, { id: ++connectionSeq, since: Date.now() })
+      // 补发历史（新连接立即看到最近弹幕）。
+      for (const event of history) {
+        send(res, encodeSseFrame(SSE_EVENT_DANMAKU, event))
+      }
       res.on('close', () => {
         subscribers.delete(res)
+        connectionMeta.delete(res)
       })
     },
   }
@@ -117,7 +136,15 @@ export function statsRoute(hub: DanmakuHub, events: () => number): RouteLike {
     path: STATS_PATH,
     handler(_req, res) {
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
-      res.end(JSON.stringify({ ok: true, subscribers: hub.subscriberCount(), events: events(), ts: Date.now() }))
+      res.end(
+        JSON.stringify({
+          ok: true,
+          subscribers: hub.subscriberCount(),
+          connections: hub.connections(),
+          events: events(),
+          ts: Date.now(),
+        }),
+      )
     },
   }
 }
