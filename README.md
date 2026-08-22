@@ -102,6 +102,7 @@ host 插件 tap ── 扫描 reasoning-delta 文本 ── 命中 hmm/wait/let 
 
 ```bash
 npm run typecheck   # 类型检查
+npm test            # 检测器回归测试（16 用例）
 npm run build       # 构建 lib/（host ESM + client CJS bundle）
 npm pack            # 产出可分发 tgz
 ```
