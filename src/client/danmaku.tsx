@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, useRef, useSyncExternalStore, type CSSProperties, type ReactElement } from 'react'
-import type { DanmakuDirection, HmmWaitConfig } from '../schema.ts'
+import type { DanmakuDirection, DanmakuZone, HmmWaitConfig } from '../schema.ts'
 import { subscribeDanmaku as subscribeSse } from './api.ts'
 import {
   clearDanmaku,
@@ -20,9 +20,6 @@ import {
   subscribeDanmakuStore,
   type DanmakuItem,
 } from './state.ts'
-
-/** 顶部/底部区域各用的轨道数。 */
-const TRACKS_PER_ZONE = 3
 
 /** 文本宽度估算（动画前测量不到的兜底）：全角 1 倍字宽，其余 0.55 倍。 */
 function estimateWidth(text: string, fontSize: number): number {
@@ -62,6 +59,17 @@ function flight(
   }
 }
 
+/** 区域占视口高度的比例：top/bottom 用上下各 40%，full 用整个视口。 */
+function zoneHeightRatio(zone: DanmakuZone): number {
+  return zone === 'full' ? 0.96 : 0.4
+}
+
+/** 按视口高度动态计算轨道数（真正铺满所选区域，而非固定几行）。 */
+function trackCountFor(zone: DanmakuZone, lineHeight: number, viewportHeight: number): number {
+  const usable = viewportHeight * zoneHeightRatio(zone)
+  return Math.max(1, Math.min(14, Math.floor(usable / lineHeight)))
+}
+
 /** 单条弹幕：定位 + 飞行动画 + 抖动。 */
 function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfig }): ReactElement {
   const ref = useRef<HTMLDivElement>(null)
@@ -69,22 +77,22 @@ function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfi
   const configRef = useRef(config)
   configRef.current = config
 
-  // 轨道与位置（由 id 派生，稳定）。
+  // 轨道与位置（由 id 派生，稳定；轨道数随视口高度动态扩展）。
   const placement = useMemo(() => {
     const zone = config.zone
-    const track = item.id % TRACKS_PER_ZONE
     const lineHeight = config.fontSize * 1.7
     const pad = 10
+    const viewportHeight = window.innerHeight
+    const count = trackCountFor(zone, lineHeight, viewportHeight)
+    const track = item.id % count
     let y: number
     if (zone === 'top') {
       y = pad + track * lineHeight
     } else if (zone === 'bottom') {
-      y = window.innerHeight - pad - (TRACKS_PER_ZONE - track) * lineHeight
+      y = viewportHeight - pad - (count - track) * lineHeight
     } else {
-      // full：0..1 顶部，2..3 底部。
-      const upper = track < 2
-      const t = upper ? track : track - 2
-      y = upper ? pad + t * lineHeight : window.innerHeight - pad - (TRACKS_PER_ZONE - t) * lineHeight
+      // full：从视口顶部铺满到底部区域。
+      y = pad + track * lineHeight
     }
     const horizontal = config.direction === 'right-to-left' || config.direction === 'left-to-right'
     return { y, horizontal }
@@ -137,6 +145,8 @@ function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfi
         style={{
           fontSize: config.fontSize,
           color: config.color,
+          fontFamily: config.fontFamily === '' ? undefined : config.fontFamily,
+          boxShadow: config.shadow ? '0 2px 10px rgba(0, 0, 0, 0.35)' : 'none',
           animationDuration: `${shakeSeconds}s`,
           ['--dsh-hmm-shake' as string]: `${config.shakeIntensity}px`,
         }}

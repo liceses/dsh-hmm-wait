@@ -38,4 +38,6 @@ export const HmmWaitSettingsSchema = Schema.object({
   maxOnScreen: Schema.number().default(DEFAULT_CONFIG.maxOnScreen),
   showContext: Schema.boolean().default(DEFAULT_CONFIG.showContext),
   maxContextChars: Schema.number().default(DEFAULT_CONFIG.maxContextChars),
+  fontFamily: Schema.string().default(DEFAULT_CONFIG.fontFamily),
+  shadow: Schema.boolean().default(DEFAULT_CONFIG.shadow),
 })

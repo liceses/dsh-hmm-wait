@@ -39,7 +39,17 @@ const FIELDS: Array<keyof HmmWaitConfig> = [
   'maxPerSecond',
   'showContext',
   'maxContextChars',
+  'fontFamily',
+  'shadow',
 ]
+
+/** 解析触发词输入框文本为数组（逗号/中文逗号分隔，去空白，忽略空项）。 */
+function parseTriggers(text: string): string[] {
+  return text
+    .split(/[,，]/)
+    .map((part) => part.trim())
+    .filter((part) => part !== '')
+}
 
 /** 值是否相等（触发词数组按序比较）。 */
 function valueEquals(a: unknown, b: unknown): boolean {
@@ -89,11 +99,15 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
   const { status, config } = useSyncExternalStore(subscribeConfig, getConfigSnapshot)
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<HmmWaitConfig | null>(null)
+  // 触发词用原始字符串暂存（不实时解析，保证空格/逗号输入不被吞）。
+  const [triggersText, setTriggersText] = useState<string>(config.triggers.join(', '))
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
   const [testState, setTestState] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle')
 
-  const dirty = draft !== null
+  const parsedTriggers = parseTriggers(triggersText)
+  const triggersDirty = !valueEquals(parsedTriggers, config.triggers)
+  const dirty = draft !== null || triggersDirty
   const current: HmmWaitConfig = draft ?? config
 
   const edit = (field: keyof HmmWaitConfig, value: unknown): void => {
@@ -102,17 +116,22 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
   }
 
   const save = async (): Promise<void> => {
-    if (draft === null || saving) return
+    if (!dirty || saving) return
     setSaving(true)
     setFailed(false)
     try {
-      // 只写与已生效值不同的字段（settings scope 串行队列保证顺序）。
+      // 最终值 = 暂存字段 + 触发词解析结果（触发词不经过 draft）。
+      const final: HmmWaitConfig = {
+        ...(draft ?? config),
+        triggers: parsedTriggers.length > 0 ? parsedTriggers : DEFAULT_CONFIG.triggers,
+      }
       for (const field of FIELDS) {
-        if (!valueEquals(draft[field], config[field])) {
-          await actions.set(field, draft[field])
+        if (!valueEquals(final[field], config[field])) {
+          await actions.set(field, final[field])
         }
       }
       setDraft(null)
+      setTriggersText(final.triggers.join(', '))
     } catch {
       setFailed(true)
     } finally {
@@ -122,6 +141,7 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
 
   const discard = (): void => {
     setDraft(null)
+    setTriggersText(config.triggers.join(', '))
     setFailed(false)
   }
 
@@ -177,15 +197,12 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
               </label>
             </Field>
 
-            <Field label="触发词（逗号分隔）" hint="正则自动转义">
+            <Field label="触发词（逗号分隔）" hint="支持含空格的词，如 let me；正则自动转义">
               <input
-                value={current.triggers.join(', ')}
+                value={triggersText}
                 onChange={(event) => {
-                  const list = event.target.value
-                    .split(/[,，]/)
-                    .map((part) => part.trim())
-                    .filter((part) => part !== '')
-                  edit('triggers', list.length > 0 ? list : DEFAULT_CONFIG.triggers)
+                  setFailed(false)
+                  setTriggersText(event.target.value)
                 }}
               />
             </Field>
@@ -250,6 +267,22 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
             </Field>
 
             <Field label="文本最大字符">{number('maxContextChars', 8, 200, DEFAULT_CONFIG.maxContextChars)}</Field>
+
+            <Field label="弹幕字体" hint="留空继承界面字体，如 Microsoft YaHei">
+              <input
+                type="text"
+                value={current.fontFamily}
+                placeholder="留空 = 继承"
+                onChange={(event) => edit('fontFamily', event.target.value)}
+              />
+            </Field>
+
+            <Field label="弹幕框阴影">
+              <label className="dsh-hmm-wait-check">
+                <input type="checkbox" checked={current.shadow} onChange={(event) => edit('shadow', event.target.checked)} />
+                <span>{current.shadow ? '开' : '关'}</span>
+              </label>
+            </Field>
 
             <Field label="大小写敏感">
               <label className="dsh-hmm-wait-check">

@@ -57,6 +57,10 @@ export interface HmmWaitConfig {
   showContext: boolean
   /** 弹幕文本最大字符数。 */
   maxContextChars: number
+  /** 弹幕字体（CSS font-family；留空继承界面字体）。 */
+  fontFamily: string
+  /** 弹幕背景框阴影。 */
+  shadow: boolean
 }
 
 /** 工厂默认值（与 schema 默认值保持一致，供 client 端无 settings 时回退）。 */
@@ -78,4 +82,6 @@ export const DEFAULT_CONFIG: HmmWaitConfig = {
   maxOnScreen: 12,
   showContext: true,
   maxContextChars: 80,
+  fontFamily: '',
+  shadow: true,
 }

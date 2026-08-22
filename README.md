@@ -69,6 +69,8 @@ dsh plugin --profile web add link:$(pwd)
 | 抖动 shake / shakeIntensity | on / 4px | 出现时抖动提醒 |
 | 同屏上限 maxOnScreen | 12 | 超出挤掉最旧 |
 | 弹幕文本 showContext / maxContextChars | 所在句 / 80 | 或仅触发词 |
+| 字体 fontFamily | 继承 | CSS font-family，留空继承界面字体 |
+| 框阴影 shadow | on | 弹幕背景框阴影开关 |
 
 ## 工作原理（30 秒版）
 
