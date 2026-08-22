@@ -22,7 +22,6 @@ export const CSS = `
   background: rgba(8, 12, 20, 0.34);
   border-radius: 10px;
   padding: 2px 12px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65);
   letter-spacing: 0.02em;
 }
 @keyframes dsh-hmm-wait-shake {

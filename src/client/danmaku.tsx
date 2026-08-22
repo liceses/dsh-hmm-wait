@@ -147,6 +147,7 @@ function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfi
           color: config.color,
           fontFamily: config.fontFamily === '' ? undefined : config.fontFamily,
           boxShadow: config.shadow ? '0 2px 10px rgba(0, 0, 0, 0.35)' : 'none',
+          textShadow: config.shadow ? '0 1px 4px rgba(0, 0, 0, 0.65)' : 'none',
           animationDuration: `${shakeSeconds}s`,
           ['--dsh-hmm-shake' as string]: `${config.shakeIntensity}px`,
         }}
