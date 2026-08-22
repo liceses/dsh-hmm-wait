@@ -146,6 +146,8 @@ function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfi
           fontSize: config.fontSize,
           color: config.color,
           fontFamily: config.fontFamily === '' ? undefined : config.fontFamily,
+          // shadow 关闭 = 彻底无阴影：外阴影、文字描边、深色背景块全部移除。
+          background: config.shadow ? 'rgba(8, 12, 20, 0.34)' : 'transparent',
           boxShadow: config.shadow ? '0 2px 10px rgba(0, 0, 0, 0.35)' : 'none',
           textShadow: config.shadow ? '0 1px 4px rgba(0, 0, 0, 0.65)' : 'none',
           animationDuration: `${shakeSeconds}s`,

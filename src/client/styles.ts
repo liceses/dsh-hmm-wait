@@ -19,7 +19,6 @@ export const CSS = `
 }
 .dsh-hmm-wait-item > span {
   display: inline-block;
-  background: rgba(8, 12, 20, 0.34);
   border-radius: 10px;
   padding: 2px 12px;
   letter-spacing: 0.02em;
