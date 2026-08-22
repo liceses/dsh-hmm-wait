@@ -30,6 +30,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && tsdown",
     "typecheck": "tsc --noEmit",
+    "test": "node scripts/run-detector-tests.mjs",
     "pack": "npm pack"
   },
   "peerDependencies": {

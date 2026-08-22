@@ -47,15 +47,15 @@ function boundaryPattern(trigger: string): string {
   return `(?:^|[^\\p{L}\\p{N}])(${escapeRegExp(trigger)})`
 }
 
-/** 从后往前找最近的句子边界，返回其后的起始索引；无边界返回 0。 */
-function sentenceStartIndex(buf: string): number {
-  for (let i = buf.length - 1; i >= 0; i--) {
+/** 在 idx 之前（不含 idx）从后往前找最近的句子边界，返回其后的起始索引；无边界返回 0。 */
+function boundaryBefore(buf: string, idx: number): number {
+  for (let i = idx - 1; i >= 0; i--) {
     if (SENTENCE_BOUNDARY.indexOf(buf[i]!) !== -1) return i + 1
   }
   return 0
 }
 
-/** buf 的 [start, idx) 区间是否只有空白/引号（"句首"判定用）。 */
+/** buf 的 [start, idx) 区间是否只有空白/引号（"句首"判定用；start ≤ idx 恒成立）。 */
 function isBlankish(buf: string, start: number, idx: number): boolean {
   for (let i = start; i < idx; i++) {
     const c = buf[i]!
@@ -66,9 +66,9 @@ function isBlankish(buf: string, start: number, idx: number): boolean {
   return true
 }
 
-/** 提取触发词所在句子（含到当前已流入的文本末尾），截断到 maxChars。 */
-function extractSentence(buf: string, maxChars: number): string {
-  let text = buf.slice(sentenceStartIndex(buf)).trim()
+/** 提取触发词所在句子（自触发词前的句边界起，含到当前已流入的文本末尾），截断到 maxChars。 */
+function extractSentence(buf: string, idx: number, maxChars: number): string {
+  let text = buf.slice(boundaryBefore(buf, idx)).trim()
   if (text.length > maxChars) text = `${text.slice(0, maxChars)}…`
   return text
 }
@@ -128,9 +128,9 @@ export class StreamTriggerDetector {
       while ((match = re.exec(this.buf)) !== null) {
         // 触发词起点 = 组 0 末尾回退组 1 长度（组 0 含前导边界字符或 ^）。
         const idx = match.index + match[0].length - match[1].length
-        // 句首模式：触发词之前（自句边界起）只能有空白/引号。
+        // 句首模式：触发词之前（自其前的句边界起）只能有空白/引号。
         if (this.options.match === 'sentence-start') {
-          const s = sentenceStartIndex(this.buf)
+          const s = boundaryBefore(this.buf, idx)
           if (!isBlankish(this.buf, s, idx)) {
             re.lastIndex = idx + Math.max(1, match[0].length - 1)
             continue
@@ -146,7 +146,7 @@ export class StreamTriggerDetector {
         if (!this.rate.allow(now)) break
 
         this.lastAt.set(trigger, now)
-        const text = extractSentence(this.buf, this.options.maxChars)
+        const text = extractSentence(this.buf, idx, this.options.maxChars)
         hits.push({ trigger, text: text === '' ? trigger : text })
         // 命中即重置句子累积：同一句的后续文本另起一句，避免重复弹。
         this.buf = ''
