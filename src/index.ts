@@ -24,7 +24,7 @@ import {
 } from './schema.ts'
 import { HmmWaitSettingsSchema } from './schema-def.ts'
 import { createDetector, type DetectorHit, type DetectorOptions } from './detect.ts'
-import { createHub, eventsRoute, testRoute, type DanmakuHub } from './routes.ts'
+import { createHub, eventsRoute, statsRoute, testRoute, type DanmakuHub } from './routes.ts'
 import type { DanmakuEvent } from './protocol.ts'
 
 /** Stable cordis plugin name. */
@@ -100,6 +100,7 @@ export function apply(ctx: Context): void {
 
   // 路由与心跳的卸载跟随插件 fiber。
   ctx.effect(() => ctx.webServer.register(eventsRoute(hub)), 'dsh-hmm-wait: events route')
+  ctx.effect(() => ctx.webServer.register(statsRoute(hub, () => eventSeq)), 'dsh-hmm-wait: stats route')
   ctx.effect(
     () =>
       ctx.webServer.register(

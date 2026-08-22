@@ -11,6 +11,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
   EVENTS_PATH,
   TEST_PATH,
+  STATS_PATH,
   SSE_EVENT_DANMAKU,
   SSE_EVENT_PING,
   encodeSseFrame,
@@ -105,6 +106,18 @@ export function eventsRoute(hub: DanmakuHubInternal): RouteLike {
       })
       res.write(': connected\n\n')
       hub._subscribe(res)
+    },
+  }
+}
+
+/** GET 诊断端点：订阅者数与累计事件数（排障用）。 */
+export function statsRoute(hub: DanmakuHub, events: () => number): RouteLike {
+  return {
+    kind: 'exact',
+    path: STATS_PATH,
+    handler(_req, res) {
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' })
+      res.end(JSON.stringify({ ok: true, subscribers: hub.subscriberCount(), events: events(), ts: Date.now() }))
     },
   }
 }

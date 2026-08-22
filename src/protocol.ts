@@ -28,6 +28,9 @@ export const EVENTS_PATH = '/api/dsh-hmm-wait/events'
 /** 测试弹幕端点（POST，设置面板"测试"按钮触发一条模拟弹幕）。 */
 export const TEST_PATH = '/api/dsh-hmm-wait/test'
 
+/** 诊断端点（GET，返回当前 SSE 订阅者数与累计事件数）。 */
+export const STATS_PATH = '/api/dsh-hmm-wait/stats'
+
 /** 把一条弹幕事件序列化为一条 SSE 帧（不含结尾空行）。 */
 export function encodeSseFrame(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
