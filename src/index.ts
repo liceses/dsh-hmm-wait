@@ -35,6 +35,26 @@ export const inject = ['webServer', 'settings']
 
 /** 弹幕事件全局序号。 */
 let eventSeq = 0
+let lastEventMs = 0
+/** 累计广播的事件数（stats 诊断用，跨热重载归零可接受）。 */
+let totalEvents = 0
+
+/**
+ * 生成全局唯一且随时间单调递增的事件 id。
+ * 热重载/重启后 eventSeq 归零，但毫秒时间戳保证新 id 恒大于旧 id，
+ * 客户端去重缓存（保留最近 500 个 id）不会被重置后的序号误杀。
+ */
+function nextEventId(): number {
+  totalEvents += 1
+  const now = Date.now()
+  if (now !== lastEventMs) {
+    lastEventMs = now
+    eventSeq = 0
+  }
+  const within = Math.min(eventSeq, 999)
+  eventSeq += 1
+  return now * 1000 + within
+}
 
 /** 从配置派生检测器选项。 */
 function detectorOptions(config: HmmWaitConfig): DetectorOptions {
@@ -55,7 +75,7 @@ function toEvent(
   options?: GenerateOptions,
 ): DanmakuEvent {
   return {
-    id: ++eventSeq,
+    id: nextEventId(),
     ts: Date.now(),
     trigger: hit.trigger,
     text: config.showContext ? hit.text : hit.trigger,
@@ -100,7 +120,7 @@ export function apply(ctx: Context): void {
 
   // 路由与心跳的卸载跟随插件 fiber。
   ctx.effect(() => ctx.webServer.register(eventsRoute(hub)), 'dsh-hmm-wait: events route')
-  ctx.effect(() => ctx.webServer.register(statsRoute(hub, () => eventSeq)), 'dsh-hmm-wait: stats route')
+  ctx.effect(() => ctx.webServer.register(statsRoute(hub, () => totalEvents)), 'dsh-hmm-wait: stats route')
   ctx.effect(
     () =>
       ctx.webServer.register(
@@ -108,7 +128,7 @@ export function apply(ctx: Context): void {
           const raw = body as { text?: unknown; trigger?: unknown } | null
           const trigger = typeof raw?.trigger === 'string' && raw.trigger !== '' ? raw.trigger : 'hmm'
           const text = typeof raw?.text === 'string' && raw.text !== '' ? raw.text : 'hmm… 让我再想想（测试弹幕）'
-          return { id: ++eventSeq, ts: Date.now(), trigger, text }
+          return { id: nextEventId(), ts: Date.now(), trigger, text }
         }),
       ),
     'dsh-hmm-wait: test route',
