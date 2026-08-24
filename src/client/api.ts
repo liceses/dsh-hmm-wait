@@ -7,7 +7,7 @@
 import type { DanmakuEvent } from '../protocol.ts'
 import { EVENTS_PATH, TEST_PATH, SSE_EVENT_DANMAKU } from '../protocol.ts'
 
-/** 订阅弹幕流；返回取消函数。断线自动 3s 重连（直到 close）。 */
+/** 订阅弹幕流；返回取消函数。断线自动 1s 重连（直到 close）。 */
 export function subscribeDanmaku(onEvent: (event: DanmakuEvent) => void): () => void {
   let closed = false
   let timer: number | null = null
@@ -17,7 +17,7 @@ export function subscribeDanmaku(onEvent: (event: DanmakuEvent) => void): () => 
     timer = window.setTimeout(() => {
       timer = null
       void connect()
-    }, 3000)
+    }, 1000)
   }
 
   const connect = async (): Promise<void> => {

@@ -24,7 +24,7 @@ import {
 } from './schema.ts'
 import { HmmWaitSettingsSchema } from './schema-def.ts'
 import { createDetector, type DetectorHit, type DetectorOptions } from './detect.ts'
-import { createHub, eventsRoute, statsRoute, testRoute, type DanmakuHub } from './routes.ts'
+import { createHub, eventsRoute, statsRoute, testRoute, type DanmakuHub, type DanmakuHubInternal } from './routes.ts'
 import type { DanmakuEvent } from './protocol.ts'
 
 /** Stable cordis plugin name. */
@@ -83,6 +83,21 @@ function toEvent(
   }
 }
 
+/** 进程级 hub 的挂载键：挂在根上下文上，热重载/插件重装时复用，SSE 连接不断。 */
+const APP_HUB_KEY = 'dsh-hmm-wait:hub:v1'
+
+/** 取进程级 hub：已存在则复用（连接与历史跨热重载存续），否则新建。 */
+function getAppHub(ctx: Context): DanmakuHubInternal {
+  const holder = ctx.root as unknown as Record<string, unknown>
+  const existing = holder[APP_HUB_KEY]
+  if (existing !== undefined && typeof (existing as DanmakuHub).broadcast === 'function') {
+    return existing as DanmakuHubInternal
+  }
+  const hub = createHub()
+  holder[APP_HUB_KEY] = hub
+  return hub
+}
+
 /**
  * Mount the plugin: settings namespace, llm/stream tap (switchable), SSE hub,
  * and the two web routes.
@@ -93,7 +108,9 @@ export function apply(ctx: Context): void {
     applies: 'live',
   })
   let config: HmmWaitConfig = { ...DEFAULT_CONFIG, ...(scope.get() ?? {}) }
-  const hub = createHub()
+  // hub 进程级存续：热重载/插件重装不断开已订阅页面，历史保留。
+  // 注意：不随 fiber dispose——路由卸载后 hub 空转无害，重装即复用。
+  const hub = getAppHub(ctx)
   let disposeTap: (() => void) | null = null
 
   // 动态挂/卸 llm/stream 监听：关闭时完全不触碰模型流。
@@ -133,7 +150,6 @@ export function apply(ctx: Context): void {
       ),
     'dsh-hmm-wait: test route',
   )
-  ctx.effect(() => () => hub.dispose(), 'dsh-hmm-wait: hub dispose')
 }
 
 /**
