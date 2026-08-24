@@ -116,7 +116,14 @@ export function eventsRoute(hub: DanmakuHubInternal): RouteLike {
   return {
     kind: 'exact',
     path: EVENTS_PATH,
-    handler(_req, res) {
+    handler(req, res) {
+      // TCP keep-alive 探测（60s）：半开连接（休眠/断网）尽快暴露，
+      // 让双方都能检测到死连接并走重连。
+      try {
+        req.socket.setKeepAlive(true, 60_000)
+      } catch {
+        /* 忽略：探测失败不影响 SSE */
+      }
       res.writeHead(200, {
         'content-type': 'text/event-stream; charset=utf-8',
         'cache-control': 'no-cache, no-transform',
