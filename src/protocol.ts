@@ -6,7 +6,7 @@
 
 /** One danmaku event pushed from host to browser over SSE. */
 export interface DanmakuEvent {
-  /** Monotonic event id（host 生成，用于 client 去重）。 */
+  /** 全局唯一、单调递增的事件 id（host 生成，client 端去重）。 */
   id: number
   /** 事件时间戳（ms）。 */
   ts: number
@@ -16,6 +16,10 @@ export interface DanmakuEvent {
   text: string
   /** 所属会话 id（agent-loop 请求携带；手写请求可能缺失）。 */
   sessionId?: string
+  /** 本次命中时的连击数（≥1；1 表示新连击开始）。 */
+  combo: number
+  /** 本进程周期内的最高连击。 */
+  comboMax: number
 }
 
 /** SSE 事件名（event: 行）。 */

@@ -61,7 +61,18 @@ export interface HmmWaitConfig {
   fontFamily: string
   /** 弹幕背景框阴影。 */
   shadow: boolean
+  /** Combo 连击 HUD 总开关。 */
+  comboEnabled: boolean
+  /** Combo 连击窗口（ms）：两次命中间隔超过则中断。 */
+  comboWindowMs: number
+  /** Combo HUD 位置。 */
+  comboPosition: ComboPosition
+  /** 里程碑播报（×10/×20/…全屏提示）。 */
+  comboMilestones: boolean
 }
+
+/** Combo HUD 位置。 */
+export type ComboPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
 
 /** 工厂默认值（与 schema 默认值保持一致，供 client 端无 settings 时回退）。 */
 export const DEFAULT_CONFIG: HmmWaitConfig = {
@@ -84,4 +95,8 @@ export const DEFAULT_CONFIG: HmmWaitConfig = {
   maxContextChars: 80,
   fontFamily: '',
   shadow: true,
+  comboEnabled: true,
+  comboWindowMs: 6000,
+  comboPosition: 'bottom-right',
+  comboMilestones: true,
 }

@@ -183,6 +183,8 @@ export function DanmakuLayer(): ReactElement {
           trigger: event.trigger,
           text: event.text,
           ts: event.ts,
+          combo: typeof event.combo === 'number' ? event.combo : 1,
+          comboMax: typeof event.comboMax === 'number' ? event.comboMax : 1,
           ...(event.sessionId !== undefined ? { sessionId: event.sessionId } : {}),
         },
         max,

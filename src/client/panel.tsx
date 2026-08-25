@@ -9,7 +9,7 @@
  */
 
 import { useState, useSyncExternalStore, type ReactElement, type ReactNode } from 'react'
-import type { DanmakuDirection, DanmakuZone, HmmWaitConfig, TriggerMatchMode } from '../schema.ts'
+import type { ComboPosition, DanmakuDirection, DanmakuZone, HmmWaitConfig, TriggerMatchMode } from '../schema.ts'
 import { DEFAULT_CONFIG } from '../schema.ts'
 import { sendTestDanmaku } from './api.ts'
 import { getConfigSnapshot, subscribeConfig } from './state.ts'
@@ -41,6 +41,10 @@ const FIELDS: Array<keyof HmmWaitConfig> = [
   'maxContextChars',
   'fontFamily',
   'shadow',
+  'comboEnabled',
+  'comboWindowMs',
+  'comboPosition',
+  'comboMilestones',
 ]
 
 /** 解析触发词输入框文本为数组（逗号/中文逗号分隔，去空白，忽略空项）。 */
@@ -288,6 +292,33 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
               <label className="dsh-hmm-wait-check">
                 <input type="checkbox" checked={current.caseSensitive} onChange={(event) => edit('caseSensitive', event.target.checked)} />
                 <span>{current.caseSensitive ? '开' : '关'}</span>
+              </label>
+            </Field>
+
+            <Field label="连击计数 HUD">
+              <label className="dsh-hmm-wait-check">
+                <input type="checkbox" checked={current.comboEnabled} onChange={(event) => edit('comboEnabled', event.target.checked)} />
+                <span>{current.comboEnabled ? '开' : '关'}</span>
+              </label>
+            </Field>
+
+            <Field label="连击窗口（ms）" hint="两次命中间隔超过则中断">
+              {number('comboWindowMs', 1000, 60000, DEFAULT_CONFIG.comboWindowMs)}
+            </Field>
+
+            <Field label="HUD 位置">
+              <select value={current.comboPosition} onChange={(event) => edit('comboPosition', event.target.value as ComboPosition)}>
+                <option value="bottom-right">右下</option>
+                <option value="bottom-left">左下</option>
+                <option value="top-right">右上</option>
+                <option value="top-left">左上</option>
+              </select>
+            </Field>
+
+            <Field label="里程碑播报">
+              <label className="dsh-hmm-wait-check">
+                <input type="checkbox" checked={current.comboMilestones} onChange={(event) => edit('comboMilestones', event.target.checked)} />
+                <span>{current.comboMilestones ? '开' : '关'}</span>
               </label>
             </Field>
           </div>

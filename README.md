@@ -19,6 +19,7 @@
 - 🔌 **无强版本依赖**：运行时只依赖公开契约（事件名 + chunk 形状），SDK 均以宽松 peer 范围声明，
   宿主 dsh 升级不影响本插件。
 - 🧪 **测试弹幕**：面板一键发送模拟弹幕，端到端验证链路（不依赖真实思维链内容）。
+- 🎮 **Combo 连击 HUD**：命中触发词 = 一击！连续命中累积连击数（游戏街机风：数字弹跳、分级变色、里程碑全屏播报、连击中断动画、最高纪录），位置可配置；连击状态在 host 计算（挂进程级），刷新/重连不丢。
 
 ## 快速开始（安装）
 
@@ -71,6 +72,10 @@ dsh plugin --profile web add link:$(pwd)
 | 弹幕文本 showContext / maxContextChars | 所在句 / 80 | 或仅触发词 |
 | 字体 fontFamily | 继承 | CSS font-family，留空继承界面字体 |
 | 框阴影 shadow | on | 弹幕背景框阴影开关 |
+| 连击 HUD comboEnabled | on | Combo 连击计数（街机风） |
+| 连击窗口 comboWindowMs | 6000 | 两次命中间隔超过则中断连击 |
+| HUD 位置 comboPosition | 右下 | 右下/左下/右上/左上 |
+| 里程碑播报 comboMilestones | on | ×10/×20/… 全屏提示 |
 
 ## 工作原理（30 秒版）
 
@@ -80,17 +85,20 @@ dsh plugin --profile web add link:$(pwd)
         ▼
 host 插件 tap ── 扫描 reasoning-delta 文本 ── 命中 hmm/wait/let me
         │                                                 │
-        │                                          检测器（句子边界/冷却/限流）
+        │                                    检测器（句子边界/冷却/限流）
+        │                                                 ▼
+        │                                    combo 状态机（进程级，连击递增）
         ▼                                                 ▼
-  SSE: /api/dsh-hmm-wait/events ◄─────── 广播 DanmakuEvent
+  SSE: /api/dsh-hmm-wait/events ◄─────── 广播 DanmakuEvent（含 combo）
         │
         ▼
-浏览器弹幕层（shell.overlay）── 轨道分配 + Web Animations 飞行 + 抖动
+浏览器：弹幕层（飞行+抖动） + Combo HUD（弹跳/变色/里程碑/中断动画）
 ```
 
 - **事件源**：`llm/stream`（dsh-llm 官方 waterfall 事件），监听器是"观察者"：不改写、不吞 chunk，检测异常也不影响模型流。
 - **配置**：host 注册 `dsh-hmm-wait` settings 命名空间；client 把快照镜像到页面，live 生效。
-- **推送**：SSE（GET `/api/dsh-hmm-wait/events`），断线自动 3s 重连；另有一个 POST `/api/dsh-hmm-wait/test` 用于测试。
+- **推送**：SSE（GET `/api/dsh-hmm-wait/events`），断线自动 1s 重连 + 半开看门狗 + 重连补发最近 50 条；另有一个 POST `/api/dsh-hmm-wait/test` 用于测试。
+- **连击**：host 侧 combo 状态机（挂进程级根上下文，热重载不丢），每个事件携带 `combo`/`comboMax`，浏览器只负责渲染。
 
 ## 无强版本依赖
 

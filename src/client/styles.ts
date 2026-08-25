@@ -223,4 +223,105 @@ export const CSS = `
   outline: 2px solid var(--dsw-alias-brand-primary, #4c9aff);
   outline-offset: 1px;
 }
+
+/* ---- combo 连击 HUD（街机风） ---- */
+.dsh-hmm-combo {
+  position: fixed;
+  z-index: 2147483010;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+}
+.dsh-hmm-combo-bottom-right { right: 22px; bottom: 26px; }
+.dsh-hmm-combo-bottom-left { left: 22px; bottom: 26px; }
+.dsh-hmm-combo-top-right { right: 22px; top: 84px; }
+.dsh-hmm-combo-top-left { left: 22px; top: 84px; }
+.dsh-hmm-combo-hud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: dsh-hmm-combo-bounce 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+.dsh-hmm-combo-num {
+  display: flex;
+  align-items: baseline;
+  font-weight: 900;
+  line-height: 1;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+.dsh-hmm-combo-times { font-size: 0.45em; margin-right: 2px; }
+.dsh-hmm-combo-count { font-size: 46px; }
+.dsh-hmm-combo-trigger {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.9;
+  margin-top: 2px;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dsh-hmm-combo-max {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.55;
+  margin-top: 4px;
+  letter-spacing: 0.08em;
+}
+/* 分级变色 */
+.dsh-hmm-combo-tier-1 { color: #f2f2f2; }
+.dsh-hmm-combo-tier-2 { color: #ffd866; }
+.dsh-hmm-combo-tier-3 { color: #ff9f43; }
+.dsh-hmm-combo-tier-4 { color: #ff4d4f; animation-duration: 0.28s; }
+/* 里程碑全屏播报 */
+.dsh-hmm-combo-milestone {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(28px, 6vw, 56px);
+  font-weight: 900;
+  font-style: italic;
+  color: #ffd866;
+  text-shadow: 0 0 24px rgba(255, 216, 102, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6);
+  animation: dsh-hmm-combo-flash 2s ease-out forwards;
+  pointer-events: none;
+}
+/* 连击中断 */
+.dsh-hmm-combo-broke {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: dsh-hmm-combo-broke 1.2s ease-in forwards;
+  color: #9aa4b2;
+}
+.dsh-hmm-combo-broke-num { font-size: 34px; font-weight: 900; font-style: italic; }
+.dsh-hmm-combo-broke-label { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
+@keyframes dsh-hmm-combo-bounce {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.35); }
+  70% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+@keyframes dsh-hmm-combo-flash {
+  0% { opacity: 0; transform: scale(0.6); }
+  15% { opacity: 1; transform: scale(1.05); }
+  25% { transform: scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+@keyframes dsh-hmm-combo-broke {
+  0% { opacity: 0; transform: translateY(8px) scale(0.8); }
+  20% { opacity: 1; transform: translateY(0) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-14px) scale(0.9); }
+}
 `

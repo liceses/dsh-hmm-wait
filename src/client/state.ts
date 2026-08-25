@@ -14,6 +14,22 @@ export interface DanmakuItem {
   text: string
   ts: number
   sessionId?: string
+  /** 本次命中时的连击数（≥1）。 */
+  combo: number
+  /** 本进程周期内的最高连击。 */
+  comboMax: number
+}
+
+/** Combo HUD 快照（由弹幕事件驱动）。 */
+export interface ComboSnapshot {
+  /** 当前连击数（0 = 无连击）。 */
+  combo: number
+  /** 历史最高。 */
+  max: number
+  /** 最近一次命中的时间戳。 */
+  lastHitAt: number
+  /** 最近命中的触发词。 */
+  trigger: string
 }
 
 /** 配置镜像快照（client 无法连到 settings 时回退默认值）。 */
@@ -67,6 +83,12 @@ export function pushDanmaku(item: DanmakuItem, maxOnScreen: number): void {
   const cap = Math.max(1, maxOnScreen)
   if (items.length > cap) items = items.slice(items.length - cap)
   emitItems()
+  publishCombo({
+    combo: item.combo,
+    max: item.comboMax,
+    lastHitAt: Date.now(),
+    trigger: item.trigger,
+  })
 }
 
 /** 动画结束后移除。 */
@@ -84,6 +106,28 @@ export function clearDanmaku(): void {
     items = []
     emitItems()
   }
+}
+
+// combo store ------------------------------------------------------------
+
+let comboSnapshot: ComboSnapshot = { combo: 0, max: 0, lastHitAt: 0, trigger: '' }
+const comboListeners = new Set<() => void>()
+
+export function subscribeCombo(fn: () => void): () => void {
+  comboListeners.add(fn)
+  return () => {
+    comboListeners.delete(fn)
+  }
+}
+
+export function getComboSnapshot(): ComboSnapshot {
+  return comboSnapshot
+}
+
+/** 由弹幕事件更新连击快照（pushDanmaku 内部调用）。 */
+function publishCombo(next: ComboSnapshot): void {
+  comboSnapshot = next
+  for (const fn of comboListeners) fn()
 }
 
 // config store -----------------------------------------------------------

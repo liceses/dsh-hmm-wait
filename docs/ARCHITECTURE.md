@@ -58,13 +58,25 @@ dsh host process
 | 表面 | 槽位 | 说明 |
 | --- | --- | --- |
 | 弹幕层 | `shell.overlay`（list, root） | 全屏 fixed、pointer-events: none、点击穿透 |
+| Combo HUD | `shell.overlay`（list, root） | 街机风连击计数（位置可配） |
 | 设置卡片 | `settings.plugin.item`（keyed, root, key=`dsh-hmm-wait`） | 官方"设置 → 插件 → 可配置"页 |
 
 - **配置镜像**：`ctx.settingsScope.bind({ namespace: 'dsh-hmm-wait' })` → `subscribe` →
   `publishConfigSnapshot()` 写进模块 store；两个组件通过 `useSyncExternalStore` 消费。
-- **SSE 订阅**：`fetch + ReadableStream` 手动解析 SSE 帧（不用 EventSource，兼容性最好），断线 3s 重连。
+- **SSE 订阅**：`fetch + ReadableStream` 手动解析 SSE 帧（不用 EventSource，兼容性最好），
+  断线 1s 重连 + 半开看门狗（45s 无数据自动重连）+ 回前台即查。
 - **动画**：Web Animations API（`element.animate`），飞行距离按方向与视口精确计算
   `duration = 距离 / speed × 1000`；抖动用注入的 CSS keyframes（幅度走 `--dsh-hmm-shake` 变量）。
+
+### 2.3 Combo 连击
+
+- **状态机在 host**（`src/combo.ts`，纯逻辑可单测）：两次命中间隔 ≤ `comboWindowMs` 连击 +1，
+  超窗重置；`max` 保留最高纪录。
+- **进程级存续**：combo 追踪器与 hub 一样挂在 `ctx.root`（`APP_COMBO_KEY`），热重载/重装不丢。
+- **协议**：每个 `DanmakuEvent` 携带 `combo`（当前连击）与 `comboMax`（最高）。
+- **浏览器 HUD**（`src/client/combo.tsx`）：数字弹跳（每击 scale 动画）、分级变色
+  （1-4 白 / 5-9 黄 / 10-19 橙 / 20+ 红+光晕）、里程碑全屏播报（×10/×20/×30/×50/×100）、
+  连击中断动画（窗口内无新命中 0.5s 检测一次）；位置四角可配。
 
 ### 2.3 装配（如何被 dsh 加载）
 

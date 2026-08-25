@@ -23,6 +23,7 @@ import {
   type HmmWaitConfig,
 } from './schema.ts'
 import { HmmWaitSettingsSchema } from './schema-def.ts'
+import { createComboTracker, type ComboTracker } from './combo.ts'
 import { createDetector, type DetectorHit, type DetectorOptions } from './detect.ts'
 import { createHub, eventsRoute, statsRoute, testRoute, type DanmakuHub, type DanmakuHubInternal } from './routes.ts'
 import type { DanmakuEvent } from './protocol.ts'
@@ -71,20 +72,27 @@ function detectorOptions(config: HmmWaitConfig): DetectorOptions {
 /** 把一次检测命中转成推送事件（showContext=false 时只显示触发词）。 */
 function toEvent(
   config: HmmWaitConfig,
+  combo: ComboTracker,
   hit: DetectorHit,
   options?: GenerateOptions,
 ): DanmakuEvent {
+  const { combo: count, max } = combo.hit(Date.now(), config.comboWindowMs)
   return {
     id: nextEventId(),
     ts: Date.now(),
     trigger: hit.trigger,
     text: config.showContext ? hit.text : hit.trigger,
+    combo: count,
+    comboMax: max,
     ...(options?.sessionId !== undefined ? { sessionId: options.sessionId } : {}),
   }
 }
 
 /** 进程级 hub 的挂载键：挂在根上下文上，热重载/插件重装时复用，SSE 连接不断。 */
 const APP_HUB_KEY = 'dsh-hmm-wait:hub:v1'
+
+/** 进程级 combo 追踪器的挂载键：连击状态跨热重载存续。 */
+const APP_COMBO_KEY = 'dsh-hmm-wait:combo:v1'
 
 /** 取进程级 hub：已存在则复用（连接与历史跨热重载存续），否则新建。 */
 function getAppHub(ctx: Context): DanmakuHubInternal {
@@ -96,6 +104,18 @@ function getAppHub(ctx: Context): DanmakuHubInternal {
   const hub = createHub()
   holder[APP_HUB_KEY] = hub
   return hub
+}
+
+/** 取进程级 combo 追踪器：热重载/插件重装不丢连击。 */
+function getAppCombo(ctx: Context): ComboTracker {
+  const holder = ctx.root as unknown as Record<string, unknown>
+  const existing = holder[APP_COMBO_KEY]
+  if (existing !== undefined && typeof (existing as ComboTracker).hit === 'function') {
+    return existing as ComboTracker
+  }
+  const tracker = createComboTracker()
+  holder[APP_COMBO_KEY] = tracker
+  return tracker
 }
 
 /**
@@ -111,6 +131,7 @@ export function apply(ctx: Context): void {
   // hub 进程级存续：热重载/插件重装不断开已订阅页面，历史保留。
   // 注意：不随 fiber dispose——路由卸载后 hub 空转无害，重装即复用。
   const hub = getAppHub(ctx)
+  const combo = getAppCombo(ctx)
   let disposeTap: (() => void) | null = null
 
   // 动态挂/卸 llm/stream 监听：关闭时完全不触碰模型流。
@@ -118,7 +139,7 @@ export function apply(ctx: Context): void {
     if (disposeTap !== null) return
     disposeTap = ctx.on('llm/stream', (options, next) => {
       if (!config.enabled) return next()
-      return tapReasoningStream(hub, config, options, next())
+      return tapReasoningStream(hub, combo, config, options, next())
     })
   }
   const uninstallTap = (): void => {
@@ -145,7 +166,8 @@ export function apply(ctx: Context): void {
           const raw = body as { text?: unknown; trigger?: unknown } | null
           const trigger = typeof raw?.trigger === 'string' && raw.trigger !== '' ? raw.trigger : 'hmm'
           const text = typeof raw?.text === 'string' && raw.text !== '' ? raw.text : 'hmm… 让我再想想（测试弹幕）'
-          return { id: nextEventId(), ts: Date.now(), trigger, text }
+          const { combo: count, max } = combo.hit(Date.now(), config.comboWindowMs)
+          return { id: nextEventId(), ts: Date.now(), trigger, text, combo: count, comboMax: max }
         }),
       ),
     'dsh-hmm-wait: test route',
@@ -158,6 +180,7 @@ export function apply(ctx: Context): void {
  */
 function tapReasoningStream(
   hub: DanmakuHub,
+  combo: ComboTracker,
   config: HmmWaitConfig,
   options: GenerateOptions | undefined,
   source: AsyncIterable<StreamChunk>,
@@ -173,7 +196,7 @@ function tapReasoningStream(
           typeof (chunk as { text?: unknown }).text === 'string'
         ) {
           for (const hit of detector.push((chunk as { text: string }).text)) {
-            hub.broadcast(toEvent(config, hit, options))
+            hub.broadcast(toEvent(config, combo, hit, options))
           }
         }
       } catch {

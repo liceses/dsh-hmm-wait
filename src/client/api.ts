@@ -126,6 +126,8 @@ function handleFrame(frame: string, onEvent: (event: DanmakuEvent) => void): voi
         ts: typeof parsed.ts === 'number' ? parsed.ts : Date.now(),
         trigger: typeof parsed.trigger === 'string' ? parsed.trigger : '',
         text: parsed.text,
+        combo: typeof parsed.combo === 'number' ? parsed.combo : 1,
+        comboMax: typeof parsed.comboMax === 'number' ? parsed.comboMax : 1,
         ...(typeof parsed.sessionId === 'string' ? { sessionId: parsed.sessionId } : {}),
       })
     }

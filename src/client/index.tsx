@@ -17,6 +17,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 import type {} from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
 import { DEFAULT_CONFIG, SETTINGS_NS, type HmmWaitConfig } from '../schema.ts'
 import { DanmakuLayer } from './danmaku.tsx'
+import { ComboHud } from './combo.tsx'
 import { SettingsCard, type HmmWaitCardActions } from './panel.tsx'
 import { publishConfigSnapshot } from './state.ts'
 import { CSS } from './styles.ts'
@@ -76,6 +77,18 @@ export function apply(ctx: ClientContext): void {
         order: 100,
       },
       DanmakuLayer,
+    ),
+  )
+
+  // Combo 连击 HUD seat。
+  ctx.slots.inject('shell.overlay', () =>
+    ctx.slots.register(
+      {
+        name: 'shell.overlay',
+        id: 'dsh-hmm-wait-combo',
+        order: 120,
+      },
+      ComboHud,
     ),
   )
 

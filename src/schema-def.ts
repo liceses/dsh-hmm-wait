@@ -40,4 +40,13 @@ export const HmmWaitSettingsSchema = Schema.object({
   maxContextChars: Schema.number().default(DEFAULT_CONFIG.maxContextChars),
   fontFamily: Schema.string().default(DEFAULT_CONFIG.fontFamily),
   shadow: Schema.boolean().default(DEFAULT_CONFIG.shadow),
+  comboEnabled: Schema.boolean().default(DEFAULT_CONFIG.comboEnabled),
+  comboWindowMs: Schema.number().default(DEFAULT_CONFIG.comboWindowMs),
+  comboPosition: Schema.union([
+    Schema.const('bottom-right' as const),
+    Schema.const('bottom-left' as const),
+    Schema.const('top-right' as const),
+    Schema.const('top-left' as const),
+  ]).default(DEFAULT_CONFIG.comboPosition),
+  comboMilestones: Schema.boolean().default(DEFAULT_CONFIG.comboMilestones),
 })
