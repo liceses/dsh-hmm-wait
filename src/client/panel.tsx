@@ -45,6 +45,8 @@ const FIELDS: Array<keyof HmmWaitConfig> = [
   'comboWindowMs',
   'comboPosition',
   'comboMilestones',
+  'comboPop',
+  'comboSound',
 ]
 
 /** 解析触发词输入框文本为数组（逗号/中文逗号分隔，去空白，忽略空项）。 */
@@ -319,6 +321,20 @@ export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): Reac
               <label className="dsh-hmm-wait-check">
                 <input type="checkbox" checked={current.comboMilestones} onChange={(event) => edit('comboMilestones', event.target.checked)} />
                 <span>{current.comboMilestones ? '开' : '关'}</span>
+              </label>
+            </Field>
+
+            <Field label="中央跳字">
+              <label className="dsh-hmm-wait-check">
+                <input type="checkbox" checked={current.comboPop} onChange={(event) => edit('comboPop', event.target.checked)} />
+                <span>{current.comboPop ? '开' : '关'}</span>
+              </label>
+            </Field>
+
+            <Field label="连击音效" hint="Web Audio 合成，无需音频文件">
+              <label className="dsh-hmm-wait-check">
+                <input type="checkbox" checked={current.comboSound} onChange={(event) => edit('comboSound', event.target.checked)} />
+                <span>{current.comboSound ? '开' : '关'}</span>
               </label>
             </Field>
           </div>

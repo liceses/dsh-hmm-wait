@@ -280,6 +280,35 @@ export const CSS = `
 .dsh-hmm-combo-tier-2 { color: #ffd866; }
 .dsh-hmm-combo-tier-3 { color: #ff9f43; }
 .dsh-hmm-combo-tier-4 { color: #ff4d4f; animation-duration: 0.28s; }
+/* 屏幕中央跳字：每次连击更新弹一下 */
+.dsh-hmm-combo-pop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-style: italic;
+  text-shadow: 0 0 30px currentColor, 0 2px 10px rgba(0, 0, 0, 0.7);
+  animation: dsh-hmm-combo-pop 0.5s cubic-bezier(0.2, 1.2, 0.3, 1) forwards;
+  pointer-events: none;
+}
+.dsh-hmm-combo-pop-times { font-size: clamp(30px, 6vw, 60px); margin-right: 4px; align-self: flex-start; margin-top: 6vh; }
+.dsh-hmm-combo-pop-count { font-size: clamp(72px, 16vw, 150px); line-height: 1; }
+.dsh-hmm-combo-pop-label {
+  font-size: clamp(16px, 3vw, 30px);
+  letter-spacing: 0.3em;
+  align-self: flex-end;
+  margin-bottom: 9vh;
+  opacity: 0.85;
+}
+@keyframes dsh-hmm-combo-pop {
+  0% { opacity: 0; transform: scale(0.3); }
+  30% { opacity: 1; transform: scale(1.25); }
+  55% { transform: scale(1); }
+  80% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(0.92) translateY(-18px); }
+}
 /* 里程碑全屏播报 */
 .dsh-hmm-combo-milestone {
   position: fixed;

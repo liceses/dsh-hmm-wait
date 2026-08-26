@@ -49,4 +49,6 @@ export const HmmWaitSettingsSchema = Schema.object({
     Schema.const('top-left' as const),
   ]).default(DEFAULT_CONFIG.comboPosition),
   comboMilestones: Schema.boolean().default(DEFAULT_CONFIG.comboMilestones),
+  comboPop: Schema.boolean().default(DEFAULT_CONFIG.comboPop),
+  comboSound: Schema.boolean().default(DEFAULT_CONFIG.comboSound),
 })

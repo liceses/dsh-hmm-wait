@@ -69,6 +69,10 @@ export interface HmmWaitConfig {
   comboPosition: ComboPosition
   /** 里程碑播报（×10/×20/…全屏提示）。 */
   comboMilestones: boolean
+  /** 连击更新时屏幕中央跳字。 */
+  comboPop: boolean
+  /** 连击音效（街机合成音，Web Audio）。 */
+  comboSound: boolean
 }
 
 /** Combo HUD 位置。 */
@@ -99,4 +103,6 @@ export const DEFAULT_CONFIG: HmmWaitConfig = {
   comboWindowMs: 6000,
   comboPosition: 'bottom-right',
   comboMilestones: true,
+  comboPop: true,
+  comboSound: true,
 }

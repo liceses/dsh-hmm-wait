@@ -2,16 +2,19 @@
  * dsh-hmm-wait — 街机风 Combo 连击 HUD（shell.overlay 第三条目）。
  *
  * 游戏化显示：大数字连击 + 触发词标签 + 每击弹跳 + 分级变色
- * （白→黄→橙→红+光晕）+ 里程碑全屏播报（×10/×20/…）+ 连击中断动画。
+ * （白→黄→橙→红+光晕）+ 屏幕中央跳字（每次连击更新弹跳闪现）+
+ * 街机合成音效（hit 拳击音 / 里程碑号角 / 中断下滑音）+
+ * 里程碑全屏播报（×10/×20/…）+ 连击中断动画。
  * 位置可配置（右下/左下/右上/左上）。数据来自弹幕事件携带的 combo
  * （host 状态机计算，刷新/重连不丢）。
  */
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactElement } from 'react'
 import type { ComboPosition, HmmWaitConfig } from '../schema.ts'
+import { playComboSound } from './audio.ts'
 import { getComboSnapshot, getConfigSnapshot, subscribeCombo, subscribeConfig } from './state.ts'
 
-/** 里程碑文案池（combo ≥ 10 且为 10 的倍数时随机播报）。 */
+/** 里程碑文案池（combo ≥ 10 且为 10 的倍数时播报）。 */
 const MILESTONE_LINES: Array<[number, string]> = [
   [10, '热身完毕！'],
   [20, '脑内风暴！'],
@@ -37,6 +40,9 @@ function milestoneText(combo: number): string | null {
   return null
 }
 
+/** 中央跳字停留时长。 */
+const POP_MS = 500
+
 /** 街机风 Combo HUD。 */
 export function ComboHud(): ReactElement {
   const combo = useSyncExternalStore(subscribeCombo, getComboSnapshot)
@@ -44,36 +50,53 @@ export function ComboHud(): ReactElement {
   const [bounceKey, setBounceKey] = useState(0)
   const [milestone, setMilestone] = useState<string | null>(null)
   const [broke, setBroke] = useState<number | null>(null)
+  const [pop, setPop] = useState<number | null>(null)
   const prevCombo = useRef(0)
   const timerLastRef = useRef(combo.lastHitAt)
+  const popTimerRef = useRef<number | null>(null)
   timerLastRef.current = combo.lastHitAt
 
-  // combo 增长 → 弹跳 + 里程碑播报。
+  // combo 变化 → 弹跳 + 中央跳字 + 音效 + 里程碑播报。
   useEffect(() => {
     const prev = prevCombo.current
     prevCombo.current = combo.combo
     if (combo.combo > 0 && combo.combo !== prev) {
       setBounceKey((key) => key + 1)
       setBroke(null)
-      if (combo.combo > prev && config.comboMilestones) {
-        const text = milestoneText(combo.combo)
-        if (text !== null) {
-          setMilestone(text)
-          const timer = window.setTimeout(() => setMilestone(null), 2000)
-          return () => window.clearTimeout(timer)
+      if (combo.combo > prev) {
+        // 连击递增：中央跳字 + 拳击音效。
+        if (config.comboPop) {
+          setPop(combo.combo)
+          if (popTimerRef.current !== null) window.clearTimeout(popTimerRef.current)
+          popTimerRef.current = window.setTimeout(() => {
+            popTimerRef.current = null
+            setPop(null)
+          }, POP_MS)
+        }
+        if (config.comboSound) playComboSound('hit', combo.combo)
+        // 里程碑：全屏播报 + 号角音效。
+        if (config.comboMilestones) {
+          const text = milestoneText(combo.combo)
+          if (text !== null) {
+            setMilestone(text)
+            if (config.comboSound) playComboSound('milestone', combo.combo)
+            const timer = window.setTimeout(() => setMilestone(null), 2000)
+            return () => window.clearTimeout(timer)
+          }
         }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combo.combo])
 
-  // 连击中断检测：窗口内无新命中 → "COMBO END" 动画。
+  // 连击中断检测：窗口内无新命中 → "COMBO END" 动画 + 下滑音效。
   useEffect(() => {
     timerLastRef.current = combo.lastHitAt
     if (combo.combo === 0) return
     const check = (): void => {
       if (Date.now() - timerLastRef.current > config.comboWindowMs) {
         setBroke(combo.combo)
+        if (config.comboSound) playComboSound('break', combo.combo)
         prevCombo.current = 0
       }
     }
@@ -82,6 +105,14 @@ export function ComboHud(): ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combo.combo, combo.lastHitAt])
 
+  // 卸载时清理 pop 定时器。
+  useEffect(
+    () => () => {
+      if (popTimerRef.current !== null) window.clearTimeout(popTimerRef.current)
+    },
+    [],
+  )
+
   if (!config.comboEnabled) return <></>
   const active = combo.combo > 0
   const tier = tierOf(combo.combo)
@@ -89,6 +120,14 @@ export function ComboHud(): ReactElement {
 
   return (
     <div className={`dsh-hmm-combo dsh-hmm-combo-${pos}`} data-combo={active ? combo.combo : 0}>
+      {/* 屏幕中央跳字：每次连击更新弹一下 */}
+      {pop !== null ? (
+        <div className={`dsh-hmm-combo-pop dsh-hmm-combo-tier-${tierOf(pop)}`} key={`pop-${pop}-${bounceKey}`}>
+          <span className="dsh-hmm-combo-pop-times">×</span>
+          <span className="dsh-hmm-combo-pop-count">{pop}</span>
+          <span className="dsh-hmm-combo-pop-label">COMBO</span>
+        </div>
+      ) : null}
       {milestone !== null ? <div className="dsh-hmm-combo-milestone">{milestone}</div> : null}
       {broke !== null ? (
         <div className="dsh-hmm-combo-broke" key={`broke-${broke}-${combo.lastHitAt}`}>
