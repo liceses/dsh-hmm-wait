@@ -241,13 +241,13 @@ export const CSS = `
   align-items: center;
   font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
 }
-/* 浅色主题（dsh 白天模式）：加深色板保证对比度 */
+/* 浅色主题：亮色填充 + 黑描边（格斗风，描边保证对比度） */
 body:not([data-ds-dark-theme]) .dsh-hmm-combo {
-  --dsh-c1: #20242e;
-  --dsh-c2: #8a6400;
-  --dsh-c3: #b85a00;
-  --dsh-c4: #c62828;
-  --dsh-milestone: #7a5200;
+  --dsh-c1: #ffffff;
+  --dsh-c2: #ffd93d;
+  --dsh-c3: #ff9f43;
+  --dsh-c4: #ff3b3b;
+  --dsh-milestone: #ffd93d;
   --dsh-broke: #5a6270;
 }
 .dsh-hmm-combo-bottom-right { right: 22px; bottom: 26px; }
@@ -271,7 +271,18 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
   font-style: italic;
   letter-spacing: -0.02em;
 }
-.dsh-hmm-combo-times { font-size: 0.45em; margin-right: 2px; }
+/* 格斗游戏 combo 数字：粗壮字体 + 黑描边 + 立体投影 */
+.dsh-hmm-combo-times,
+.dsh-hmm-combo-count {
+  font-family: 'Arial Black', Impact, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  -webkit-text-stroke: 2.5px #14161c;
+  paint-order: stroke fill;
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.6),
+    0 5px 0 rgba(0, 0, 0, 0.35),
+    0 8px 16px rgba(0, 0, 0, 0.55);
+}
+.dsh-hmm-combo-times { font-size: 0.45em; margin-right: 2px; -webkit-text-stroke-width: 2px; }
 .dsh-hmm-combo-count { font-size: 46px; }
 .dsh-hmm-combo-trigger {
   font-size: 12px;
@@ -310,7 +321,17 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
   animation: dsh-hmm-combo-pop 0.5s cubic-bezier(0.2, 1.2, 0.3, 1) forwards;
   pointer-events: none;
 }
-.dsh-hmm-combo-pop-times { font-size: clamp(30px, 6vw, 60px); margin-right: 4px; align-self: flex-start; margin-top: 6vh; }
+.dsh-hmm-combo-pop-times,
+.dsh-hmm-combo-pop-count {
+  font-family: 'Arial Black', Impact, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  -webkit-text-stroke: 4px #14161c;
+  paint-order: stroke fill;
+  text-shadow:
+    0 5px 0 rgba(0, 0, 0, 0.6),
+    0 9px 0 rgba(0, 0, 0, 0.35),
+    0 14px 28px rgba(0, 0, 0, 0.6);
+}
+.dsh-hmm-combo-pop-times { font-size: clamp(30px, 6vw, 60px); margin-right: 4px; align-self: flex-start; margin-top: 6vh; -webkit-text-stroke-width: 3px; }
 .dsh-hmm-combo-pop-count { font-size: clamp(72px, 16vw, 150px); line-height: 1; }
 .dsh-hmm-combo-pop-label {
   font-size: clamp(16px, 3vw, 30px);
@@ -318,6 +339,9 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
   align-self: flex-end;
   margin-bottom: 9vh;
   opacity: 0.85;
+  font-weight: 900;
+  -webkit-text-stroke: 1.5px #14161c;
+  paint-order: stroke fill;
 }
 @keyframes dsh-hmm-combo-pop {
   0% { opacity: 0; transform: scale(0.3); }
@@ -337,7 +361,14 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
   font-weight: 900;
   font-style: italic;
   color: var(--dsh-milestone);
-  text-shadow: 0 0 24px currentColor, 0 2px 8px rgba(0, 0, 0, 0.6);
+  font-family: 'Arial Black', Impact, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  -webkit-text-stroke: 2px #14161c;
+  paint-order: stroke fill;
+  text-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.55),
+    0 8px 0 rgba(0, 0, 0, 0.3),
+    0 12px 28px rgba(0, 0, 0, 0.6),
+    0 0 40px currentColor;
   animation: dsh-hmm-combo-flash 2s ease-out forwards;
   pointer-events: none;
 }
@@ -349,7 +380,14 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
   animation: dsh-hmm-combo-broke 1.2s ease-in forwards;
   color: var(--dsh-broke);
 }
-.dsh-hmm-combo-broke-num { font-size: 34px; font-weight: 900; font-style: italic; }
+.dsh-hmm-combo-broke-num {
+  font-size: 34px;
+  font-weight: 900;
+  font-style: italic;
+  font-family: 'Arial Black', Impact, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  -webkit-text-stroke: 2px #14161c;
+  paint-order: stroke fill;
+}
 .dsh-hmm-combo-broke-label { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
 @keyframes dsh-hmm-combo-bounce {
   0% { transform: scale(1); }
