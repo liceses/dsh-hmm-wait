@@ -145,7 +145,14 @@ function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfi
         style={{
           fontSize: config.fontSize,
           color: config.color,
-          fontFamily: config.fontFamily === '' ? undefined : config.fontFamily,
+          // 默认风格化字体（粗壮格斗感）；fontFamily 配置留空时使用。
+          fontFamily:
+            config.fontFamily === ''
+              ? "'Arial Black', Impact, 'Segoe UI', 'Microsoft YaHei', sans-serif"
+              : config.fontFamily,
+          // 风格化描边：黑边勾字（与 combo 数字同款）；shadow 关闭时一并移除。
+          WebkitTextStroke: config.shadow ? '1.5px rgba(12, 14, 18, 0.9)' : 'none',
+          paintOrder: 'stroke fill',
           // shadow 关闭 = 彻底无阴影：外阴影、文字描边、深色背景块全部移除。
           background: config.shadow ? 'rgba(8, 12, 20, 0.34)' : 'transparent',
           boxShadow: config.shadow ? '0 2px 10px rgba(0, 0, 0, 0.35)' : 'none',

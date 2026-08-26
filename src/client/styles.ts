@@ -22,6 +22,10 @@ export const CSS = `
   border-radius: 10px;
   padding: 2px 12px;
   letter-spacing: 0.02em;
+  /* 风格化默认：粗壮字体 + 粗字重（inline 层已有描边/字体，此处兜底） */
+  font-family: 'Arial Black', Impact, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-weight: 800;
+  line-height: 1.6;
 }
 @keyframes dsh-hmm-wait-shake {
   0%, 100% { transform: translateX(0); }
