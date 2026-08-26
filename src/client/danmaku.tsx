@@ -163,16 +163,16 @@ function DanmakuView({ item, config }: { item: DanmakuItem; config: HmmWaitConfi
 /** 弹幕层根组件：订阅 SSE + 渲染存活弹幕。 */
 export function DanmakuLayer(): ReactElement {
   const items = useSyncExternalStore(subscribeDanmakuStore, getDanmakuSnapshot)
-  const { status, config } = useSyncExternalStore(subscribeConfig, getConfigSnapshot)
+  const { config } = useSyncExternalStore(subscribeConfig, getConfigSnapshot)
   const enabledRef = useRef(config.enabled)
   const configRef = useRef(config)
   enabledRef.current = config.enabled
   configRef.current = config
 
-  // SSE 订阅（跟随 enabled 开关）。
+  // SSE 订阅：挂载即订阅，与 settings 镜像状态解耦。
+  // （此前依赖 status==='ready' 才订阅，镜像一旦卡 loading 就永不订阅，
+  //   表现为页面活着但弹幕全无——刷新才恢复。现在弹幕独立于配置链路。）
   useEffect(() => {
-    if (status !== 'ready' && status !== 'unavailable') return
-    if (!enabledRef.current) return
     const unsubscribe = subscribeSse((event) => {
       if (!enabledRef.current) return
       const cfg = configRef.current
@@ -194,7 +194,8 @@ export function DanmakuLayer(): ReactElement {
       unsubscribe()
       clearDanmaku()
     }
-  }, [status])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // enabled 关闭时清屏。
   useEffect(() => {
