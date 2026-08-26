@@ -308,18 +308,25 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
 .dsh-hmm-combo-tier-2 { color: var(--dsh-c2); }
 .dsh-hmm-combo-tier-3 { color: var(--dsh-c3); }
 .dsh-hmm-combo-tier-4 { color: var(--dsh-c4); animation-duration: 0.28s; }
-/* 屏幕中央跳字：每次连击更新弹一下 */
+/* 屏幕中央跳字：每次连击更新弹一下（×N 与 COMBO 紧凑居中） */
 .dsh-hmm-combo-pop {
   position: fixed;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   font-weight: 900;
   font-style: italic;
   text-shadow: 0 0 30px currentColor, 0 2px 10px rgba(0, 0, 0, 0.7);
   animation: dsh-hmm-combo-pop 0.5s cubic-bezier(0.2, 1.2, 0.3, 1) forwards;
   pointer-events: none;
+}
+.dsh-hmm-combo-pop-num {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
 }
 .dsh-hmm-combo-pop-times,
 .dsh-hmm-combo-pop-count {
@@ -331,13 +338,11 @@ body:not([data-ds-dark-theme]) .dsh-hmm-combo {
     0 9px 0 rgba(0, 0, 0, 0.35),
     0 14px 28px rgba(0, 0, 0, 0.6);
 }
-.dsh-hmm-combo-pop-times { font-size: clamp(30px, 6vw, 60px); margin-right: 4px; align-self: flex-start; margin-top: 6vh; -webkit-text-stroke-width: 3px; }
-.dsh-hmm-combo-pop-count { font-size: clamp(72px, 16vw, 150px); line-height: 1; }
+.dsh-hmm-combo-pop-times { font-size: clamp(30px, 6vw, 60px); margin-right: 6px; -webkit-text-stroke-width: 3px; }
+.dsh-hmm-combo-pop-count { font-size: clamp(72px, 16vw, 150px); }
 .dsh-hmm-combo-pop-label {
   font-size: clamp(16px, 3vw, 30px);
   letter-spacing: 0.3em;
-  align-self: flex-end;
-  margin-bottom: 9vh;
   opacity: 0.85;
   font-weight: 900;
   -webkit-text-stroke: 1.5px #14161c;

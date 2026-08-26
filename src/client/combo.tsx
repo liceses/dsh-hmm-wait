@@ -125,8 +125,10 @@ export function ComboHud(): ReactElement {
       {/* 屏幕中央跳字：每次连击更新弹一下 */}
       {pop !== null ? (
         <div className={`dsh-hmm-combo-pop dsh-hmm-combo-tier-${tierOf(pop)}`} key={`pop-${pop}-${bounceKey}`}>
-          <span className="dsh-hmm-combo-pop-times">×</span>
-          <span className="dsh-hmm-combo-pop-count">{pop}</span>
+          <div className="dsh-hmm-combo-pop-num">
+            <span className="dsh-hmm-combo-pop-times">×</span>
+            <span className="dsh-hmm-combo-pop-count">{pop}</span>
+          </div>
           <span className="dsh-hmm-combo-pop-label">COMBO</span>
         </div>
       ) : null}
