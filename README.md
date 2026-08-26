@@ -4,7 +4,7 @@
 > 在 dsh Web GUI 上弹出**可配置的弹幕动画**：流动方向、速度、抖动提醒、颜色、区域等全部可调，
 > 并集成 dsh 官方设置面板（开关 + 全部参数）。
 
-![形态](docs/architecture.svg)（结构图见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)）
+结构说明见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ---
 
@@ -27,7 +27,7 @@
 
 ```bash
 # 1. 克隆仓库（或下载 GitHub Release 里的 dsh-hmm-wait-0.1.0.tgz）
-git clone https://github.com/<your-name>/dsh-hmm-wait.git
+git clone https://github.com/liceses/dsh-hmm-wait.git
 cd dsh-hmm-wait
 
 # 2. 构建（需要 node ≥ 20 与 npm）
@@ -70,7 +70,7 @@ dsh plugin --profile web add link:$(pwd)
 | 抖动 shake / shakeIntensity | on / 4px | 出现时抖动提醒 |
 | 同屏上限 maxOnScreen | 12 | 超出挤掉最旧 |
 | 弹幕文本 showContext / maxContextChars | 所在句 / 80 | 或仅触发词 |
-| 字体 fontFamily | 继承 | CSS font-family，留空继承界面字体 |
+| 字体 fontFamily | 风格化默认 | CSS font-family；留空使用默认（Arial Black/Impact 粗体 + 黑描边） |
 | 框阴影 shadow | on | 弹幕背景框阴影开关 |
 | 连击 HUD comboEnabled | on | Combo 连击计数（街机风） |
 | 连击窗口 comboWindowMs | 6000 | 两次命中间隔超过则中断连击 |
