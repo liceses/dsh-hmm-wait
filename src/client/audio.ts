@@ -11,6 +11,9 @@
  */
 
 let sharedCtx: AudioContext | null = null
+/** hit 音效最短间隔（ms）：命中频率过高时节流，避免连续咚咚咚。 */
+const HIT_MIN_GAP_MS = 120
+let lastHitAt = 0
 
 /** 取共享 AudioContext（首次调用创建，suspended 时尝试恢复）。 */
 function getSharedContext(): AudioContext | null {
@@ -54,6 +57,10 @@ export function playComboSound(kind: 'hit' | 'milestone' | 'break', combo: numbe
   const now = ctx.currentTime
 
   if (kind === 'hit') {
+    // 节流：间隔过短（高频命中流）跳过，避免"咚咚咚"噪音。
+    const wallNow = Date.now()
+    if (wallNow - lastHitAt < HIT_MIN_GAP_MS) return
+    lastHitAt = wallNow
     // 拳击感：音高随连击数上升（每级 +7Hz，上限封顶）。
     const base = 150 + Math.min(combo, 30) * 7
     blip(ctx, now, base, 0.1, 0.16, 'square')

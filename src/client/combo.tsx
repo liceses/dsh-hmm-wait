@@ -89,19 +89,21 @@ export function ComboHud(): ReactElement {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combo.combo])
 
-  // 连击中断检测：窗口内无新命中 → "COMBO END" 动画 + 下滑音效。
+  // 连击中断检测：窗口内无新命中 → 一次性触发"COMBO END"动画 + 下滑音效。
+  // （每次 combo 更新重置定时器，只触发一次，不会循环响）
   useEffect(() => {
     timerLastRef.current = combo.lastHitAt
     if (combo.combo === 0) return
-    const check = (): void => {
+    const timer = window.setTimeout(() => {
       if (Date.now() - timerLastRef.current > config.comboWindowMs) {
         setBroke(combo.combo)
         if (config.comboSound) playComboSound('break', combo.combo)
         prevCombo.current = 0
+        // 动画结束后自动清除（1.5s，略长于 CSS 动画 1.2s）。
+        window.setTimeout(() => setBroke(null), 1500)
       }
-    }
-    const timer = window.setInterval(check, 500)
-    return () => window.clearInterval(timer)
+    }, config.comboWindowMs + 300)
+    return () => window.clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combo.combo, combo.lastHitAt])
 

@@ -226,6 +226,13 @@ export const CSS = `
 
 /* ---- combo 连击 HUD（街机风） ---- */
 .dsh-hmm-combo {
+  /* 深色主题默认色板 */
+  --dsh-c1: #f2f2f2;
+  --dsh-c2: #ffd866;
+  --dsh-c3: #ff9f43;
+  --dsh-c4: #ff4d4f;
+  --dsh-milestone: #ffd866;
+  --dsh-broke: #9aa4b2;
   position: fixed;
   z-index: 2147483010;
   pointer-events: none;
@@ -233,6 +240,15 @@ export const CSS = `
   flex-direction: column;
   align-items: center;
   font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+}
+/* 浅色主题（dsh 白天模式）：加深色板保证对比度 */
+body:not([data-ds-dark-theme]) .dsh-hmm-combo {
+  --dsh-c1: #20242e;
+  --dsh-c2: #8a6400;
+  --dsh-c3: #b85a00;
+  --dsh-c4: #c62828;
+  --dsh-milestone: #7a5200;
+  --dsh-broke: #5a6270;
 }
 .dsh-hmm-combo-bottom-right { right: 22px; bottom: 26px; }
 .dsh-hmm-combo-bottom-left { left: 22px; bottom: 26px; }
@@ -260,6 +276,7 @@ export const CSS = `
 .dsh-hmm-combo-trigger {
   font-size: 12px;
   font-weight: 700;
+  color: #fff;
   opacity: 0.9;
   margin-top: 2px;
   padding: 1px 10px;
@@ -275,11 +292,11 @@ export const CSS = `
   margin-top: 4px;
   letter-spacing: 0.08em;
 }
-/* 分级变色 */
-.dsh-hmm-combo-tier-1 { color: #f2f2f2; }
-.dsh-hmm-combo-tier-2 { color: #ffd866; }
-.dsh-hmm-combo-tier-3 { color: #ff9f43; }
-.dsh-hmm-combo-tier-4 { color: #ff4d4f; animation-duration: 0.28s; }
+/* 分级变色（深浅主题双色板） */
+.dsh-hmm-combo-tier-1 { color: var(--dsh-c1); }
+.dsh-hmm-combo-tier-2 { color: var(--dsh-c2); }
+.dsh-hmm-combo-tier-3 { color: var(--dsh-c3); }
+.dsh-hmm-combo-tier-4 { color: var(--dsh-c4); animation-duration: 0.28s; }
 /* 屏幕中央跳字：每次连击更新弹一下 */
 .dsh-hmm-combo-pop {
   position: fixed;
@@ -319,8 +336,8 @@ export const CSS = `
   font-size: clamp(28px, 6vw, 56px);
   font-weight: 900;
   font-style: italic;
-  color: #ffd866;
-  text-shadow: 0 0 24px rgba(255, 216, 102, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6);
+  color: var(--dsh-milestone);
+  text-shadow: 0 0 24px currentColor, 0 2px 8px rgba(0, 0, 0, 0.6);
   animation: dsh-hmm-combo-flash 2s ease-out forwards;
   pointer-events: none;
 }
@@ -330,7 +347,7 @@ export const CSS = `
   flex-direction: column;
   align-items: center;
   animation: dsh-hmm-combo-broke 1.2s ease-in forwards;
-  color: #9aa4b2;
+  color: var(--dsh-broke);
 }
 .dsh-hmm-combo-broke-num { font-size: 34px; font-weight: 900; font-style: italic; }
 .dsh-hmm-combo-broke-label { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
