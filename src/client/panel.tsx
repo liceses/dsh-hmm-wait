@@ -1,8 +1,9 @@
 /**
  * dsh-hmm-wait — settings card（官方折叠卡片风格）。
  *
- * Rendered into the `settings.plugin.item` slot（设置 → 插件 → 可配置）。
- * 形态与官方 BashCard / AgentLoopCard 一致：折叠卡片（标题 + 描述 +
+ * Rendered into the 0.1.6a2 插件管理页的 `plugins.bundle.config` 槽位
+ * （侧栏「插件」→「已安装」→「查看 dsh-hmm-wait」），由内置适配层
+ * `src/vendor/dsh-plugin-config-slot.tsx` 负责注册。形态与官方 BashCard / AgentLoopCard 一致：折叠卡片（标题 + 描述 +
  * chevron + 未保存徽章）→ 展开为字段表单 → 底部 丢弃 / 保存 操作；
  * 编辑先暂存（draft），点保存才写入 settings scope（live 生效）。
  * 样式使用官方主题变量（--dsw-alias-*），与设置页其余卡片同观感。
@@ -100,10 +101,20 @@ function Field({
   )
 }
 
-/** 官方风格折叠配置卡片。 */
-export function SettingsCard({ actions }: { actions: HmmWaitCardActions }): ReactElement {
+/**
+ * 官方风格折叠配置卡片。
+ * @param props - 写入面 + 初始展开态（插件管理页把配置画在独立页面上，默认展开）。
+ */
+export function SettingsCard({
+  actions,
+  defaultOpen = false,
+}: {
+  actions: HmmWaitCardActions
+  /** 初次挂载是否直接展开（默认收起，保持插件内嵌使用时的原观感）。 */
+  defaultOpen?: boolean
+}): ReactElement {
   const { status, config } = useSyncExternalStore(subscribeConfig, getConfigSnapshot)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(defaultOpen)
   const [draft, setDraft] = useState<HmmWaitConfig | null>(null)
   // 触发词用原始字符串暂存（不实时解析，保证空格/逗号输入不被吞）。
   const [triggersText, setTriggersText] = useState<string>(config.triggers.join(', '))

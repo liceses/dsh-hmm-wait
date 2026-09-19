@@ -1,7 +1,7 @@
 {
   "name": "dsh-hmm-wait",
   "version": "0.1.0",
-  "description": "Hmm-Wait 思维链弹幕：监听模型思维链（reasoning）输出，当出现 hmm / wait / let me 等触发词时，在 dsh Web GUI 上弹出可配置的弹幕动画（方向 / 速度 / 抖动 / 样式均可调），并带官方设置面板开关。",
+  "description": "Hmm-Wait 思维链弹幕：监听模型思维链（reasoning）输出，当出现 hmm / wait / let me 等触发词时，在 dsh Web GUI 上弹出可配置的弹幕动画（方向 / 速度 / 抖动 / 样式均可调），配置面板挂在 0.1.6a2 插件管理页的插件自己的页面上。",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",

@@ -2,9 +2,10 @@
  * dsh-hmm-wait — settings types, defaults, and the namespace string.
  *
  * The settings namespace is registered by the host half through the official
- * `ctx.settings` service, so the dsh 设置面板（settings → plugins →
- * configurable）auto-discovers the namespace and pairs it with the card this
- * package registers into the `settings.plugin.item` slot. This file carries
+ * `ctx.settings` service. The browser half binds that namespace with
+ * `ctx.settingsScope` and registers its configuration card into the 0.1.6a2
+ * 插件管理页的 `plugins.bundle.config` 槽位（键 = 组合包名 `dsh-hmm-wait`；旧的
+ * `settings.plugin.item` 槽位在 0.1.6a2 已被统一插件管理取代）。This file carries
  * NO runtime dependencies (the browser bundle imports it); the schemastery
  * schema itself lives in `schema-def.ts` (host only).
  */

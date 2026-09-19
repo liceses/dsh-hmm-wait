@@ -26,7 +26,7 @@ dsh-hmm-wait/
 │       ├── api.ts          # SSE 订阅（自动重连）+ 测试弹幕调用
 │       ├── state.ts        # 模块级 store（弹幕队列 + 配置快照，useSyncExternalStore）
 │       ├── danmaku.tsx     # 弹幕层（轨道分配 + Web Animations 飞行 + 抖动）
-│       ├── panel.tsx       # 设置卡片（settings.plugin.item 槽位）
+│       ├── panel.tsx       # 配置卡片（经 src/vendor/dsh-plugin-config-slot.tsx 注册进 plugins.bundle.config）
 │       └── styles.ts       # 注入页面的 CSS（keyframes + 卡片样式）
 └── docs/ARCHITECTURE.md    # 本文档
 ```
@@ -59,7 +59,7 @@ dsh host process
 | --- | --- | --- |
 | 弹幕层 | `shell.overlay`（list, root） | 全屏 fixed、pointer-events: none、点击穿透 |
 | Combo HUD | `shell.overlay`（list, root） | 街机风连击计数（位置可配） |
-| 设置卡片 | `settings.plugin.item`（keyed, root, key=`dsh-hmm-wait`） | 官方"设置 → 插件 → 可配置"页 |
+| 配置面板 | `plugins.bundle.config`（keyed, root, key=`dsh-hmm-wait`） | 0.1.6a2 插件管理页里本插件自己的页面（侧栏「插件」→「查看 hmm-wait」）；旧的 `settings.plugin.item` 已被统一插件管理移除 |
 
 - **配置镜像**：`ctx.settingsScope.bind({ namespace: 'dsh-hmm-wait' })` → `subscribe` →
   `publishConfigSnapshot()` 写进模块 store；两个组件通过 `useSyncExternalStore` 消费。

@@ -58,20 +58,15 @@ const clientConfig: UserConfig = {
   clean: false,
   // Platform modules stay external (the loader table answers them); every
   // other dependency inlines into the bundle.
+  //
+  // tsdown 0.22 dropped the boolean form: `alwaysBundle: true` normalizes to
+  // the pattern list `[true]` and throws ("Expected pattern to be a non-empty
+  // string") as soon as a bare import that is not in `neverBundle` shows up —
+  // i.e. exactly the helper package this plugin now inlines. Spell the intent
+  // out as the supported `NoExternalFn` predicate instead.
   deps: {
     neverBundle: CLIENT_EXTERNALS,
-    alwaysBundle: true,
-  },
-  define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
-    'import.meta.env.MODE': JSON.stringify(process.env.NODE_ENV ?? 'production'),
-    'import.meta.env': JSON.stringify({ MODE: process.env.NODE_ENV ?? 'production' }),
-  },
-  // Platform modules stay external (the loader table answers them); every
-  // other dependency inlines into the bundle.
-  deps: {
-    neverBundle: CLIENT_EXTERNALS,
-    alwaysBundle: true,
+    alwaysBundle: (id: string) => !CLIENT_EXTERNALS.includes(id),
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),

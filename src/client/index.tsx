@@ -2,9 +2,14 @@
  * dsh-hmm-wait — browser half, runs inside the dsh web GUI.
  *
  * Registers two surfaces through the official slot system:
- *  - `shell.overlay`   → the danmaku layer (click-through, frame-wide);
- *  - `settings.plugin.item` (keyed by the `dsh-hmm-wait` settings namespace)
- *    → the configuration card in the official settings → plugins tab.
+ *  - `shell.overlay` → the danmaku layer (click-through, frame-wide);
+ *  - `plugins.bundle.config`（键 = 本插件的组合包名 `dsh-hmm-wait`）
+ *    → 配置面板，画在 0.1.6a2 插件管理页里本插件自己的页面上
+ *    （侧栏「插件」→「已安装」→「查看 dsh-hmm-wait」）。
+ *
+ * 0.1.6a2 统一插件管理后，rc7 时代的 `settings.plugin.item` 槽位已不存在；
+ * 注册统一交给内置适配层 `src/vendor/dsh-plugin-config-slot.tsx`（该文件头部
+ * 有新旧对照说明；唯一源在 workspace 的 dsh-plugin-config-slot 包里）。
  *
  * The settings snapshot is mirrored into module state so both surfaces react
  * to live changes (applies: live on the host side).
@@ -14,12 +19,12 @@ import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type { SettingsScope } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
-import type {} from '@deepseek-ai/dsh-client-ui-settings-plugins/client'
+import { registerBundleConfigPage } from '../vendor/dsh-plugin-config-slot.tsx'
 import { DEFAULT_CONFIG, SETTINGS_NS, type HmmWaitConfig } from '../schema.ts'
 import { DanmakuLayer } from './danmaku.tsx'
 import { ComboHud } from './combo.tsx'
 import { SettingsCard, type HmmWaitCardActions } from './panel.tsx'
-import { publishConfigSnapshot } from './state.ts'
+import { getConfigSnapshot, publishConfigSnapshot, subscribeConfig } from './state.ts'
 import { CSS } from './styles.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -92,14 +97,11 @@ export function apply(ctx: ClientContext): void {
     ),
   )
 
-  // Settings card (configurable-plugins tab), keyed by our namespace.
-  ctx.slots.inject('settings.plugin.item', () =>
-    ctx.slots.register(
-      {
-        name: 'settings.plugin.item',
-        key: SETTINGS_NS,
-      },
-      () => <SettingsCard actions={actions} />,
-    ),
-  )
+  // 配置面板：0.1.6a2 插件管理页的 `plugins.bundle.config`，键 = 本组合包名。
+  registerBundleConfigPage(ctx, {
+    bundle: 'dsh-hmm-wait',
+    summary: '模型思维链出现 hmm / wait / let me 时弹幕提醒',
+    source: { getSnapshot: getConfigSnapshot, subscribe: subscribeConfig },
+    render: () => <SettingsCard actions={actions} defaultOpen />,
+  })
 }
